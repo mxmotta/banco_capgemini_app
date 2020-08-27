@@ -8,8 +8,9 @@
       <v-toolbar-title>Banco Capgemini</v-toolbar-title>
     </v-app-bar>
 
-    <v-main class="px-5 mt-5 container text-center">
-      <div v-if="!hasAccount">
+    <v-main class="px-5 container text-center">
+      <v-row>
+      <div v-if="!hasAccount" class="col-md-6 offset-md-3 align-center">
         <v-img src="./assets/welcome.png" alt="welcome"></v-img>
         <p>
           Seja bem vindo ao nosso banco! <br>
@@ -17,6 +18,7 @@
         </p>
         <v-btn color="#30275b" block style="color: #fff;" @click="createAccount">Abrir conta</v-btn>
       </div>
+      </v-row>
       <div v-if="hasAccount">
         <Balance :account_id='account_id' :account_number='account_number'></Balance>
         <Movements :account_id='account_id'></Movements>
@@ -50,6 +52,7 @@
 <script>
 
 import { create } from "./services/domain/account";
+import { mapMutations, mapGetters } from "vuex";
 import Balance from "./components/Balance";
 import Movements from "./components/Movements";
 
@@ -57,11 +60,11 @@ export default {
   name: 'App',
 
   computed: {
+    ...mapGetters({
+      account_id: 'getAccountId'
+    }),
     account_number(){
       return `${localStorage.account}-${localStorage.digit}`
-    },
-    account_id(){
-      return localStorage.account_id
     }
   },
 
@@ -80,12 +83,14 @@ export default {
   }),
 
   mounted(){
-    if(this.account_id != undefined){
+    if(this.account_id == 0){
+      this.setAccountId(localStorage.account_id)
       this.hasAccount = true
     }
   }, 
 
   methods:{
+    ...mapMutations(['setAccountId']),
     createAccount(){
         create()
         .then((res) => {
@@ -97,7 +102,10 @@ export default {
             this.dialog.status = true
             this.dialog.title = 'Sucesso!'
             this.dialog.message = 'Sua conta foi criada com sucesso'
-            this.hasAccount = true
+        })
+        .then(() => {
+          this.setAccountId(localStorage.account_id)
+          this.hasAccount = true
         })
         .catch(() => {
             this.dialog.status = true
