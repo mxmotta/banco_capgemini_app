@@ -1,4 +1,4 @@
-# banco_capgemini_app
+# mxbank_app
 
 ## Project setup
 ```
